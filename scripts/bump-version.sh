@@ -7,7 +7,7 @@
 # platform-specific files:
 #   - com.posthog.unity/package.json (Unity Package Manager)
 #   - com.posthog.unity/Runtime/Utilities/SdkInfo.Generated.cs (runtime version constant)
-#   - com.posthog.unity/CHANGELOG.md (copy of root changelog for UPM)
+#   - com.posthog.unity/CHANGELOG.md (symlink to root, no action needed)
 
 set -eux
 
@@ -47,8 +47,5 @@ EOF
 
 echo "✓ Updated SdkInfo.Generated.cs to version $NEW_VERSION"
 
-# Copy root CHANGELOG.md to package directory for UPM
-if [ -f "CHANGELOG.md" ]; then
-    cp CHANGELOG.md com.posthog.unity/CHANGELOG.md
-    echo "✓ Copied CHANGELOG.md to com.posthog.unity/"
-fi
+# Note: com.posthog.unity/CHANGELOG.md is a symlink to ../CHANGELOG.md
+# so no copy is needed.

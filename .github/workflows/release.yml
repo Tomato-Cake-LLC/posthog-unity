@@ -142,7 +142,7 @@ jobs:
         id: apply-changesets
         run: |
           pnpm changeset version
-          NEW_VERSION=$(node -p "require('./com.posthog.unity/package.json').version")
+          NEW_VERSION=$(node -p "require('./package.json').version")
           echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
           echo "New version: $NEW_VERSION"
 
@@ -183,7 +183,7 @@ jobs:
           NEW_VERSION: ${{ steps.apply-changesets.outputs.new-version }}
         run: |
           # Extract the latest changelog entry (content between first and second ## header)
-          LAST_CHANGELOG_ENTRY=$(awk -v defText="see CHANGELOG.md" '/^## /{if (flag) exit; flag=1; next} flag; END{if (!flag) print defText}' com.posthog.unity/CHANGELOG.md)
+          LAST_CHANGELOG_ENTRY=$(awk -v defText="see CHANGELOG.md" '/^## /{if (flag) exit; flag=1; next} flag; END{if (!flag) print defText}' CHANGELOG.md)
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \

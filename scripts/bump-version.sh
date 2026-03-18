@@ -7,7 +7,7 @@
 # platform-specific files:
 #   - com.posthog.unity/package.json (Unity Package Manager)
 #   - com.posthog.unity/Runtime/Utilities/SdkInfo.Generated.cs (runtime version constant)
-#   - com.posthog.unity/CHANGELOG.md is managed by changesets directly
+#   - com.posthog.unity/CHANGELOG.md (symlink to root, no action needed)
 
 set -eux
 
@@ -47,5 +47,5 @@ EOF
 
 echo "✓ Updated SdkInfo.Generated.cs to version $NEW_VERSION"
 
-# Note: CHANGELOG.md is managed by changesets directly in com.posthog.unity/
-# The root CHANGELOG.md is a pointer file (monorepo style).
+# Note: com.posthog.unity/CHANGELOG.md is a symlink to ../CHANGELOG.md
+# so no copy is needed.

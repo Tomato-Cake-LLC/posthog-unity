@@ -370,6 +370,10 @@ namespace PostHogUnity
             // Add SDK properties
             AddSdkProperties(eventProps);
 
+            // Touch session before reading the ID so a stale session is rotated
+            // before its ID is stamped on the event.
+            _sessionManager.Touch();
+
             // Add session ID
             var sessionId = _sessionManager.SessionId;
             if (!string.IsNullOrEmpty(sessionId))
@@ -387,9 +391,6 @@ namespace PostHogUnity
             // Create and enqueue the event
             var evt = new PostHogEvent(eventName, _identityManager.DistinctId, eventProps);
             _eventQueue.Enqueue(evt);
-
-            // Touch session
-            _sessionManager.Touch();
 
             PostHogLogger.Debug($"Captured event: {eventName}");
         }

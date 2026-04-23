@@ -99,6 +99,15 @@ namespace PostHogUnity
         public Action OnFeatureFlagsLoaded { get; set; }
 
         /// <summary>
+        /// Whether to persist session state across app launches.
+        /// When true (the default), sessions survive short app restarts — if the user
+        /// returns within the 30-minute idle timeout, the same session continues.
+        /// When false, quitting the app always ends the session and a fresh session
+        /// is created on the next launch.
+        /// </summary>
+        public bool PersistSessionAcrossLaunches { get; set; } = true;
+
+        /// <summary>
         /// Whether to flush events before the application quits.
         /// When true, the SDK uses Application.wantsToQuit to delay quitting
         /// until the final flush completes (with a timeout).

@@ -13,6 +13,7 @@ namespace PostHogUnity
         static readonly TimeSpan MaxSessionLength = TimeSpan.FromHours(24);
 
         readonly IStorageProvider _storage;
+        readonly bool _persistSession;
         readonly object _lock = new();
 
         string _sessionId;
@@ -32,11 +33,15 @@ namespace PostHogUnity
             }
         }
 
-        public SessionManager(IStorageProvider storage)
+        public SessionManager(IStorageProvider storage, bool persistSession = true)
         {
             _storage = storage;
+            _persistSession = persistSession;
             _isInForeground = true;
-            LoadState();
+            if (_persistSession)
+            {
+                LoadState();
+            }
         }
 
         /// <summary>
@@ -207,6 +212,7 @@ namespace PostHogUnity
 
         void SaveState()
         {
+            if (!_persistSession) return;
             try
             {
                 var state = new Dictionary<string, object>

@@ -70,6 +70,38 @@ namespace PostHogUnity.Tests
             }
         }
 
+        public class TheTryGetTimestampMethod
+        {
+            [Fact]
+            public void ReturnsTheGenerationTime()
+            {
+                var before = DateTime.UtcNow.AddMilliseconds(-1);
+                var uuid = UuidV7.Generate();
+                var after = DateTime.UtcNow.AddMilliseconds(1);
+
+                Assert.True(UuidV7.TryGetTimestamp(uuid, out var timestamp));
+                Assert.InRange(timestamp, before, after);
+            }
+
+            [Theory]
+            [InlineData("550e8400-e29b-41d4-a716-446655440000")] // version 4
+            [InlineData("not-a-uuid")]
+            [InlineData("")]
+            public void RejectsAnythingThatIsNotAUuidV7(string value)
+            {
+                Assert.False(UuidV7.TryGetTimestamp(value, out var timestamp));
+                Assert.Equal(default, timestamp);
+            }
+
+            // A well-formed v7 can carry any 48-bit value, and the top of that range is past the
+            // year DateTime stops at. This arrives from a deep link, so it must not throw.
+            [Fact]
+            public void RejectsATimestampBeyondWhatADateTimeCanHold()
+            {
+                Assert.False(UuidV7.TryGetTimestamp("ffffffff-ffff-7fff-8fff-ffffffffffff", out _));
+            }
+        }
+
         public class TheGenerateBytesMethod
         {
             [Fact]

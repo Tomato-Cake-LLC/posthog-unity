@@ -33,7 +33,11 @@ namespace PostHogUnity
             }
         }
 
-        public SessionManager(IStorageProvider storage, bool persistSession = true)
+        public SessionManager(
+            IStorageProvider storage,
+            bool persistSession = true,
+            string initialSessionId = null
+        )
         {
             _storage = storage;
             _persistSession = persistSession;
@@ -42,6 +46,39 @@ namespace PostHogUnity
             {
                 LoadState();
             }
+
+            if (!string.IsNullOrEmpty(initialSessionId))
+            {
+                JoinSession(initialSessionId);
+            }
+        }
+
+        /// <summary>
+        /// Adopts a session started elsewhere (see PostHogConfig.InitialSessionId). The start time
+        /// comes from the id's own UUIDv7 timestamp, so the 24h rotation stays anchored to when the
+        /// session really began rather than when this app joined it.
+        /// </summary>
+        void JoinSession(string sessionId)
+        {
+            if (!UuidV7.TryGetTimestamp(sessionId, out var startedAt))
+            {
+                // Warning, not Error: this arrives from outside the app (a deep link), so a bad
+                // value is bad input to report, not a fault of ours to raise to the crash reporter.
+                PostHogLogger.Warning(
+                    $"Not joining session '{sessionId}': a PostHog session id must be a UUIDv7"
+                );
+                return;
+            }
+
+            lock (_lock)
+            {
+                _sessionId = sessionId;
+                _sessionStartTime = startedAt;
+                _lastActivityTime = DateTime.UtcNow;
+                SaveState();
+            }
+
+            PostHogLogger.Debug($"Joined session: {sessionId} (started {startedAt:o})");
         }
 
         /// <summary>

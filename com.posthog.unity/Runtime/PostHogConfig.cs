@@ -108,6 +108,14 @@ namespace PostHogUnity
         public bool PersistSessionAcrossLaunches { get; set; } = true;
 
         /// <summary>
+        /// Session to join at startup instead of opening a new one, for a client spawned by
+        /// another app that is already in a PostHog session (its events then share one session).
+        /// Must be the UUIDv7 PostHog requires of $session_id; anything else is rejected and a
+        /// fresh session is started.
+        /// </summary>
+        public string InitialSessionId { get; set; }
+
+        /// <summary>
         /// Whether to flush events before the application quits.
         /// When true, the SDK uses Application.wantsToQuit to delay quitting
         /// until the final flush completes (with a timeout).

@@ -84,6 +84,46 @@ namespace PostHogUnity
             return bytes;
         }
 
+        /// <summary>
+        /// Reads the creation time out of a UUID v7 string, rejecting any other UUID version.
+        /// </summary>
+        public static bool TryGetTimestamp(string uuid, out DateTime timestampUtc)
+        {
+            timestampUtc = default;
+            if (!Guid.TryParseExact(uuid, "D", out _))
+            {
+                return false;
+            }
+
+            var hex = uuid.Replace("-", "");
+            if (hex[12] != '7')
+            {
+                return false;
+            }
+
+            if (
+                !long.TryParse(
+                    hex.Substring(0, 12),
+                    System.Globalization.NumberStyles.HexNumber,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    out var milliseconds
+                )
+            )
+            {
+                return false;
+            }
+
+            // A v7 timestamp is 48 bits, whose top end is past the year DateTime stops at, and
+            // FromUnixTimeMilliseconds throws rather than saturating.
+            if (milliseconds > DateTimeOffset.MaxValue.ToUnixTimeMilliseconds())
+            {
+                return false;
+            }
+
+            timestampUtc = DateTimeOffset.FromUnixTimeMilliseconds(milliseconds).UtcDateTime;
+            return true;
+        }
+
         static string FormatUuid(byte[] bytes)
         {
             return $"{bytes[0]:x2}{bytes[1]:x2}{bytes[2]:x2}{bytes[3]:x2}-"
